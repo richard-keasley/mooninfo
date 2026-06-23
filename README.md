@@ -8,7 +8,7 @@ spl_autoload_register(function($classname) {
 	$target = 'basecamp\mooninfo';
 	if($classname!==$target) return false;
 	$suffix = ''; // maybe used later if I release versions
-	$docroot = __DIR__; // set this to the root for your project
+	$docroot = __DIR__; // set this to the path for your project's dependencies
 	$include = sprintf('%s/mooninfo%s/mooninfo.php', $docroot, $suffix);
 	$success = is_file($include);
 	if($success) require $include;	

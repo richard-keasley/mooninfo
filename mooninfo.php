@@ -15,7 +15,7 @@ function __construct(?DateTime $date=null) {
 
 	$keys = [
 		'phase', 'illumination',
-		'age', 
+		'age', 'timestamp', 
 		'distance', 'diameter',
 	];		
 	foreach($keys as $key) {
@@ -30,12 +30,14 @@ function __construct(?DateTime $date=null) {
 	$blue = [];
 	$val = $this->blue_month(); if($val) $blue[] = 'month';
 	$val = $this->blue_seasonal(); if($val) $blue[] = 'seasonal';
+	/*
 	if($blue) {
 		$ts = (int) $this->getPhaseFullMoon();
 		$dt = new \DateTime;
 		$dt->setTimestamp($ts);
 		array_unshift($blue, $dt->format('Y-m-d'));
 	}
+	*/
 	$this->_data['blue'] = implode(', ', $blue);
 }
 	
