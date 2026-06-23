@@ -3,8 +3,8 @@
 Mooninfo is a wrapper class for 
 [php-moon-phase](https://github.com/BitAndBlack/php-moon-phase)
 
-
-```spl_autoload_register(function($classname) {
+```
+spl_autoload_register(function($classname) {
 	$target = 'basecamp\mooninfo';
 	if($classname!==$target) return false;
 	$suffix = ''; // maybe used later if I release versions
