@@ -117,10 +117,10 @@ $interval = new  \DateInterval('P1D');
 echo "<h2>Full info for {$count} days, starting {$moontime->format('j F Y')}</h2>";
 ?>
 <p>
-A Synodic month (the period taken for the moon to g through a complete cycle) is 29.53 days  (stored as <code>moonphase->synmonth</code>).
+A Synodic month (the period taken for the moon to go through a complete cycle) is 29.53 days  (stored as <code>moonphase->synmonth</code>).
 Each phase lasts 1/8 of a Synodic month (3.69 days).
 Below shows the <em>start date</em> of each moon phase over the period. 
-A <em>total</em> full moon (phase 0.5, age 14.77) occurs a day or so after the <em>start</em> of the "full moon" phase.</p>
+A <em>total</em> full moon (phase 0.5, age 14.77) occurs a day or so after the <em>start</em> of the "full moon" phase (phase 0.4375, age 12.92).</p>
 
 <div style="display:flex;flex-wrap:wrap;gap:1em;padding:0.1em;"><?php
 $mooninfo = new mooninfo($moontime);
