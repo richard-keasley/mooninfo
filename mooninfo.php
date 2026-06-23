@@ -147,18 +147,18 @@ static function moon_name(?DateTime $dt=null): string {
 	
 	$month = (int) $dt->format('n');
 	return match($month) {
-		1 => 'Wolf Moon',
-		2 => 'Snow Moon',
-		3 => 'Worm Moon',
-		4 => 'Pink Moon',
-		5 => 'Flower Moon',
-		6 => 'Strawberry Moon',
-		7 => 'Buck Moon',
-		8 => 'Sturgeon Moon',
-		9 => 'Corn Moon',
-		10 => "Hunter's Moon",
-		11 => 'Beaver Moon',
-		12 => 'Cold Moon',
+		1 => 'Wolf',
+		2 => 'Snow',
+		3 => 'Worm',
+		4 => 'Pink',
+		5 => 'Flower',
+		6 => 'Strawberry',
+		7 => 'Buck',
+		8 => 'Sturgeon',
+		9 => 'Corn',
+		10 => "Hunter's",
+		11 => 'Beaver',
+		12 => 'Cold',
 		default => 'Unknown'
 	};
 }
