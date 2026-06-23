@@ -45,8 +45,9 @@ function __get($key) {
 }
 
 /**
- * Check if this is a blue moon (second full moon in a calendar month)
- * @return bool True if this is a blue moon
+ * Is this is a monthly blue moon 
+ * second full moon in a calendar month
+ * @return bool
  */
 private function blue_month() : bool {
 	// look for previous full moon this month
@@ -68,9 +69,9 @@ private function blue_month() : bool {
 }
 
 /**
- * Check if this is an astronomical blue moon 
+ * Is this is an astronomical blue moon 
  * third full moon in a season with 4 full moons
- * @return bool True if this is an astronomical blue moon
+ * @return bool
  */
 private function blue_seasonal() : bool {
 	if($this->phase_name != 'Full Moon') return false;
@@ -204,5 +205,12 @@ static function image(float $phase) : string {
 		</svg>';	 
 	return sprintf($format, $mask, $key);
 }
-  
+ 
+static function example() : string {
+	ob_start();
+	$include = __DIR__ . '/example.php';
+	include $include;
+	return ob_get_clean();
+}
+ 
 }
