@@ -1,6 +1,7 @@
 <?php 
 use basecamp\mooninfo;
-?>
+
+if($htm_page) { ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,7 +12,7 @@ use basecamp\mooninfo;
 <title>Mooninfo</title>
 </head>
 <body style="font-size:12pt;font-family:sans-serif;">
-
+<?php } ?>
 
 <section>
 <h1>Moon info</h1>
@@ -157,9 +158,10 @@ for($i=0; $i<=$count; $i++) {
 ?></div>
 </section>
 
+<?php if($htm_page) { ?>
 </body>
 </html>
-<?php
+<?php }
 
 class html {
 

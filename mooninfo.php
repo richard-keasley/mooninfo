@@ -208,7 +208,7 @@ static function image(float $phase) : string {
 	return sprintf($format, $mask, $key);
 }
  
-static function example() : string {
+static function example($htm_page=true) : string {
 	ob_start();
 	$include = __DIR__ . '/example.php';
 	include $include;
