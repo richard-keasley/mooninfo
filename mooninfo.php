@@ -168,44 +168,49 @@ static function moon_name(?DateTime $dt=null): string {
  * @param phase: float for moon phase (0-1) 
  * @return string containing SVG image 
  */
-
+static $mask_id = 0;
 static function image(float $phase) : string {
-	$count = 8; // 8 images
-	$key = round($phase * $count) % $count;
-		
-	$mask = match($key) {
-		// new moon
-        0 => '<rect width="100" height="100" fill="black"/>',
-		
-		1 => '<rect width="100" height="100" fill="white"/>
-		<circle cx="10" cy="50" r="65" fill="black"/>',
-				 
-        2 => '<rect x="50" y="0" width="50" height="100" fill="white"/>',
-		
-		3 => '<rect width="100" height="100" fill="black"/>
-		<circle cx="90" cy="50" r="65" fill="white"/>',
-	
-		4 => '<rect width="100" height="100" fill="white"/>',
-		
-		5 => '<rect width="100" height="100" fill="black"/>
-		<circle cx="10" cy="50" r="65" fill="white"/>',
-		
-		6 => '<rect x="0" y="0" width="50" height="100" fill="white"/>',
-		
-		7 => '<rect width="100" height="100" fill="white"/>
-		<circle cx="90" cy="50" r="65" fill="black"/>',
-		
-	};
+	// in case phase >= 1.0
+	$whole = floor($phase);
+	$phase = $phase - $whole;
+	$qtr = (int) ($phase * 4);
 	/*
-	shadow (#303038) in 1st layer
-	colour (#f0f0f5) rendered on top with a mask to obscure the hidden parts 
+	0: waxing crescent
+	1: waxing gibbous
+	2: waning gibbous
+	3: waning crescent
+	
+	shadow (left/right)
+	ellipse fill (shadow/light)
+	ellipse factor (0 - 0.25)
 	*/
-	$format = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-		<defs><mask id="mm%2$u">%s</mask></defs>
-		<circle cx="50" cy="50" r="50" fill="#303038"/>
-		<circle cx="50" cy="50" r="50" fill="#f0f0f5" mask="url(#mm%2$u)"/>
-		</svg>';	 
-	return sprintf($format, $mask, $key);
+	$matrix = [
+		[000, '#bbb', 0.25 - $phase,], // left,  shadow
+		[000, 'black', $phase - 0.25,], // left,  light
+		[200, 'black', 0.75 - $phase,], // right, light  
+		[200, '#bbb', $phase - 0.75,], // right, shadow
+	];
+	$recx = $matrix[$qtr][0];   // shadow position
+	$ellf = $matrix[$qtr][1];   // ellipse fill
+	$factor = $matrix[$qtr][2]; // ellipse factor
+	$radians = 2 * pi() * $factor; // ellipse angle
+	$ellx = sin($radians); // ellipse width
+	
+	// scale
+	$ellx = $ellx * 200;
+	// unique ID for this image mask
+	self::$mask_id++; 
+			
+ob_start(); ?>
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+<defs><mask id="mmask-<?php echo self::$mask_id;?>">
+<rect x="<?php echo $recx;?>" y="0" width="200" height="400" fill="#bbb"/>
+<ellipse cx="200" cy="200" rx="<?php echo $ellx;?>" ry="200" fill="<?php echo $ellf;?>"/>
+</mask></defs>
+<circle cx="200" cy="200" r="200" fill="#eee"/>
+<circle cx="200" cy="200" r="200" fill="#000" mask="url(#mmask-<?php echo self::$mask_id;?>)"/>
+</svg>
+<?php return ob_get_clean();
 }
  
 static function example($htm_page=true) : string {

@@ -14,12 +14,20 @@ if($htm_page) { ?>
 <body style="font-size:12pt;font-family:sans-serif;">
 <?php } ?>
 
+<div><?php
+$interval = 0.002;
+$format = '<div style="width:5em;display:none;" class="slide">%s</div>';
+for($phase=0; $phase<1; $phase += $interval) {
+	printf($format, \basecamp\mooninfo::image($phase));
+}
+?></div>
+
 <section>
 <h1>Moon info</h1>
 <div style="display:flex;flex-wrap:wrap;gap:0;background:#202030"><?php
 $interval = 1 / 8;
 $style = 'width:3em;padding:0.5em;margin:0;';
-for($i=0; $i<=1.5; $i=$i+$interval) {
+for($i=0; $i<=1; $i=$i+$interval) {
 	echo html::div(mooninfo::image($i), $style);
 }
 ?></div>
@@ -160,6 +168,21 @@ for($i=0; $i<=$count; $i++) {
 
 <?php if($htm_page) { ?>
 </body>
+<script>
+let currentIndex = 0;
+
+const nextSlide = (inc) => {
+	const slides = document.getElementsByClassName("slide");
+	for (let i = 0; i < slides.length; i++) {
+		slides[i].style.display = "none";
+	}
+	currentIndex=(currentIndex+slides.length+inc)%slides.length;
+	slides[currentIndex].style.display = "block";
+}
+
+setInterval(function() { nextSlide(1); }, 20); 
+
+</script>
 </html>
 <?php }
 
