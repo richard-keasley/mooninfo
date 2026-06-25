@@ -15,20 +15,31 @@ if($htm_page) { ?>
 <?php } ?>
 
 <div><?php
-$interval = 0.002;
+$moontime = new \DateTime;
+$mooninfo = new mooninfo($moontime);
+$ts_start = (int) $mooninfo->getPhaseNewMoon();
+$ts_stop = (int) $mooninfo->getPhaseNextNewMoon();
+
+$interval = 45000;
 $format = '<div style="width:5em;display:none;" class="slide">%s</div>';
-for($phase=0; $phase<1; $phase += $interval) {
-	printf($format, \basecamp\mooninfo::image($phase));
+
+for($ts=$ts_start; $ts<$ts_stop; $ts += $interval) {
+	$moontime->setTimestamp($ts);
+	$mooninfo = new mooninfo($moontime);
+	printf($format, $mooninfo->image);
 }
-?></div>
+
+?></section>
 
 <section>
 <h1>Moon info</h1>
 <div style="display:flex;flex-wrap:wrap;gap:0;background:#202030"><?php
-$interval = 1 / 8;
+$interval = 180000;
 $style = 'width:3em;padding:0.5em;margin:0;';
-for($i=0; $i<=1; $i=$i+$interval) {
-	echo html::div(mooninfo::image($i), $style);
+for($ts=$ts_start; $ts<$ts_stop; $ts += $interval) {
+	$moontime->setTimestamp($ts);
+	$mooninfo = new mooninfo($moontime);
+	echo html::div($mooninfo->image, $style);
 }
 ?></div>
 <p>Mooninfo is a wrapper class for <a href="https://github.com/BitAndBlack/php-moon-phase">php-moon-phase</a>.</p>
@@ -71,37 +82,46 @@ echo html::ul($items, $ul_style);
 </div>
 </section>
 
-<section><?php
+<section>
+<?php 
+$rows = [];
 $moontime = new \DateTime('2026-01-01');
-$count = 24;
-echo "<h2>Quarters for {$count} lunar months, starting {$moontime->format('j F Y')}</h2>";
-
 $mooninfo = new mooninfo($moontime);
+$moontime = new \DateTime;
+$mooninfo = new mooninfo($moontime);
+$ts_start = (int) $mooninfo->getPhaseNewMoon();
+$moontime->setTimestamp($ts_start);
+$mooninfo = new mooninfo($moontime);
+
+
+
+
 
 $img_style = 'width:1em;margin:0 auto;';
 $format0 = '<div>%s</div>';
 $format1 = '<div style="text-align:center">%s</div>';
 $datetime = new \DateTime;
-	
+
+$count = 24;
+echo "<h2>Quarters for {$count} lunar months, starting {$moontime->format('j F Y')}</h2>";
 ?>
 <div style="display:grid; width:30em; gap:0.3em; grid-template-columns:25% 25% 25% 25%;"><?php
 for($i=0; $i<=$count; $i++) {
-	if(!$i) {
-		$labels = [
-			html::div(mooninfo::image(0.00), $img_style),
-			html::div(mooninfo::image(0.25), $img_style),
-			html::div(mooninfo::image(0.50), $img_style),
-			html::div(mooninfo::image(0.75), $img_style),
-		];
-		foreach($labels as $label) printf($format0, $label);
-	}
-	
 	$timestamps = [
 		$mooninfo->getPhaseNewMoon(),
 		$mooninfo->getPhaseFirstQuarter(),
 		$mooninfo->getPhaseFullMoon(),
 		$mooninfo->getPhaseLastQuarter(),
 	];
+	
+	if(!$i) {
+		// header row
+		foreach($timestamps as $timestamp) {
+			$datetime->setTimestamp((int) $timestamp);
+			$mooninfo = new mooninfo($datetime);
+			echo html::div($mooninfo->image, $img_style);
+		}
+	}
 		
 	foreach($timestamps as $timestamp) {
 		$datetime->setTimestamp((int) $timestamp);
@@ -114,7 +134,8 @@ for($i=0; $i<=$count; $i++) {
 	$full_dt = (new \DateTime)->setTimestamp((int) $full_ts);
 	$mooninfo = new mooninfo($full_dt);
 }
-?></div>
+?>
+</div>
 </section>
 
 <section>
@@ -134,30 +155,36 @@ A <em>total</em> full moon (phase 0.5, age 14.77) occurs a day or so after the <
 $mooninfo = new mooninfo($moontime);
 $remember = null;
 $img_style = 'width:2em;padding:0.5em;margin:0;display:inline-block;vertical-align:middle;';
-$ul_style = 'width:16em;overflow:hidden;list-style:none;padding:0.2em;margin:0;background:#f8f8f8;';
+$ul_style = 'width:16em;overflow:hidden;list-style:none;padding:0.2em;margin:0;background:#eef;';
 for($i=0; $i<=$count; $i++) {
 	if($mooninfo->phase_name!==$remember) {
 		// skip forward until we get a new moon phase 
-		$remember = $mooninfo->phase_name;
+		# $remember = $mooninfo->phase_name;
 		
-		$info = $mooninfo->data;
-		foreach($info as $key=>$val) {
-			$info[$key] = match($key) {
-				'image' => html::div($info[$key], $img_style),
+		$data = $mooninfo->data;
+		$keys = ['phase_name', 'name', 'blue', 'image'];
+		foreach($keys as $key) $data[$key] = $mooninfo->{$key};
+		
+		$list = [];
+		foreach($data as $key=>$val) {
+			if($val==='') continue;
+
+			$list[$key] = match($key) {
+				'image' => html::div($val, $img_style),
 				
-				'date' => (new \DateTime($info[$key]))->format('j M Y'),
+				'date' => (new \DateTime($val))->format('j M Y'),
 			
 				'phase', 
 				'illumination', 
 				'age', 
 				'distance', 
-				'diameter' => round($info[$key], 3),
-				
+				'diameter' => round($val, 3),
+						
 				default => $val
 			};
 		}
 				
-		echo html::ul($info, $ul_style);
+		echo html::ul($list, $ul_style);
 	}
 	
 	$moontime->add($interval);
@@ -180,7 +207,7 @@ const nextSlide = (inc) => {
 	slides[currentIndex].style.display = "block";
 }
 
-setInterval(function() { nextSlide(1); }, 20); 
+setInterval(function() { nextSlide(1); }, 100); 
 
 </script>
 </html>

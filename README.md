@@ -5,14 +5,16 @@ Mooninfo is a wrapper class for
 
 ```
 spl_autoload_register(function($classname) {
-	$target = 'basecamp\mooninfo';
-	if($classname!==$target) return false;
-	$suffix = ''; // maybe used later if I release versions
-	$docroot = __DIR__; // set this to the path for your project's dependencies
-	$include = sprintf('%s/mooninfo%s/mooninfo.php', $docroot, $suffix);
-	$success = is_file($include);
-	if($success) require $include;	
-	return $success;
+	if($classname==='basecamp\mooninfo') {
+		$suffix = ''; // version suffix (e.g."-1.1.0")
+		$docroot = __DIR__; // path to the project's dependencies
+		$include = sprintf('%s/mooninfo%s/mooninfo.php', $docroot, $suffix);
+		if(is_file($include)) {
+			require $include;
+			return true;
+		}
+	}
+	return false;
 });
 
 echo \basecamp\mooninfo::example();
