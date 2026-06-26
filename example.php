@@ -14,36 +14,64 @@ if($htm_page) { ?>
 <body style="font-size:12pt;font-family:sans-serif;">
 <?php } ?>
 
-<div><?php
+<section style="background:#002;color:#eee;display:flex;padding:0.5em;">
+<h1>Moon info</h1>
+
+<div style="width:7em;padding:1em;"><?php
 $moontime = new \DateTime;
 $mooninfo = new mooninfo($moontime);
 $ts_start = (int) $mooninfo->getPhaseNewMoon();
 $ts_stop = (int) $mooninfo->getPhaseNextNewMoon();
+$ts_period = $ts_stop - $ts_start;
 
-$interval = 45000;
-$format = '<div style="width:5em;display:none;" class="slide">%s</div>';
+$format = '<div style="display:none;" class="slide">%s</div>';
 
-for($ts=$ts_start; $ts<$ts_stop; $ts += $interval) {
+$steps = 64;
+$interval = round($ts_period / $steps);
+for($step=0; $step<$steps; $step++) {
+	$ts = $ts_start + ($step * $interval);
 	$moontime->setTimestamp($ts);
 	$mooninfo = new mooninfo($moontime);
 	printf($format, $mooninfo->image);
 }
 
-?></section>
+?>
+</div>
+<script>
+let currentIndex = 0;
+
+const nextSlide = (inc) => {
+	const slides = document.getElementsByClassName("slide");
+	for (let i = 0; i < slides.length; i++) {
+		slides[i].style.display = "none";
+	}
+	currentIndex=(currentIndex+slides.length+inc)%slides.length;
+	slides[currentIndex].style.display = "block";
+}
+
+setInterval(function() { nextSlide(1); }, 100); 
+
+</script>
+</section>
+
+<p>Mooninfo is a wrapper class for <a href="https://github.com/BitAndBlack/php-moon-phase">php-moon-phase</a>.</p>
+<p>This example page shows how to get moon information (moon name, blue moon, icon) for any given date.</p>
 
 <section>
-<h1>Moon info</h1>
-<div style="display:flex;flex-wrap:wrap;gap:0;background:#202030"><?php
-$interval = 180000;
+<div style="display:flex;flex-wrap:wrap;gap:0;background:#002"><?php
+
 $style = 'width:3em;padding:0.5em;margin:0;';
-for($ts=$ts_start; $ts<$ts_stop; $ts += $interval) {
+
+$steps = 12;
+$interval = round($ts_period / $steps);
+for($step=0; $step<=$steps; $step++) {
+	$ts = $ts_start + ($step * $interval);
 	$moontime->setTimestamp($ts);
 	$mooninfo = new mooninfo($moontime);
 	echo html::div($mooninfo->image, $style);
 }
 ?></div>
-<p>Mooninfo is a wrapper class for <a href="https://github.com/BitAndBlack/php-moon-phase">php-moon-phase</a>.</p>
-<p>This example page shows how to get moon information (name, blue, icon) for a variety of dates.</p>
+
 </section>
 
 <section>
@@ -54,7 +82,10 @@ $mooninfo = new mooninfo;
 $img_style = "width:5em;background:#002;padding:0.5em;";
 $ul_style = 'list-style:none;padding:0.5em 0;margin:0;';
 
-$items = [];
+$items = [
+	'Phase' => sprintf('%s (%u%%)', $mooninfo->phase_name, round($mooninfo->illumination * 100)),
+];
+
 $timestamps = [
 	'this_new'  => $mooninfo->getPhaseNewMoon(),
 	'this_full' => $mooninfo->getPhaseFullMoon(),
@@ -64,17 +95,16 @@ $timestamps = [
 asort($timestamps);
 $datetime = new \DateTime;
 // future lunar events
+$count = 0;
 foreach($timestamps as $key=>$timestamp) {
 	if($timestamp<=$mooninfo->timestamp) continue; // in the past
 	$arr = explode('_', $key);
 	$label = "Next {$arr[1]} moon";
 	$datetime->setTimestamp((int) $timestamp);
 	$items[$label] = $datetime->format('j M Y H:i');
-	if(count($items)>1) break; // all done
+	$count++;
+	if($count==2) break; // all done
 }
-//  current phase
-$phase = round($mooninfo->phase * 100);
-$items['Phase'] = "{$mooninfo->phase_name} ({$phase}%)";
 
 echo html::div($mooninfo->image, $img_style);
 echo html::ul($items, $ul_style);
@@ -92,10 +122,6 @@ $mooninfo = new mooninfo($moontime);
 $ts_start = (int) $mooninfo->getPhaseNewMoon();
 $moontime->setTimestamp($ts_start);
 $mooninfo = new mooninfo($moontime);
-
-
-
-
 
 $img_style = 'width:1em;margin:0 auto;';
 $format0 = '<div>%s</div>';
@@ -143,18 +169,16 @@ for($i=0; $i<=$count; $i++) {
 $moontime = new \DateTime('2026-01-01');
 $count = 400;
 $interval = new  \DateInterval('P1D');
-echo "<h2>Full info for {$count} days, starting {$moontime->format('j F Y')}</h2>";
+echo "<h2>Moon info for {$count} days, starting {$moontime->format('j F Y')}</h2>";
 ?>
 <p>
 A Synodic month (the period taken for the moon to go through a complete cycle) is 29.53 days  (stored as <code>moonphase->synmonth</code>).
 Each phase lasts 1/8 of a Synodic month (3.69 days).
-Below shows the <em>start date</em> of each moon phase over the period. 
 A <em>total</em> full moon (phase 0.5, age 14.77) occurs a day or so after the <em>start</em> of the "full moon" phase (phase 0.4375, age 12.92).</p>
 
 <div style="display:flex;flex-wrap:wrap;gap:1em;padding:0.1em;"><?php
 $mooninfo = new mooninfo($moontime);
 $remember = null;
-$img_style = 'width:2em;padding:0.5em;margin:0;display:inline-block;vertical-align:middle;';
 $ul_style = 'width:16em;overflow:hidden;list-style:none;padding:0.2em;margin:0;background:#eef;';
 for($i=0; $i<=$count; $i++) {
 	if($mooninfo->phase_name!==$remember) {
@@ -168,6 +192,9 @@ for($i=0; $i<=$count; $i++) {
 		$list = [];
 		foreach($data as $key=>$val) {
 			if($val==='') continue;
+			
+			$format = 'width:%fem;padding:0.5em;margin:0;display:inline-block;vertical-align:middle;';
+			$img_style = sprintf($format, 8 * $mooninfo->diameter);
 
 			$list[$key] = match($key) {
 				'image' => html::div($val, $img_style),
@@ -195,21 +222,6 @@ for($i=0; $i<=$count; $i++) {
 
 <?php if($htm_page) { ?>
 </body>
-<script>
-let currentIndex = 0;
-
-const nextSlide = (inc) => {
-	const slides = document.getElementsByClassName("slide");
-	for (let i = 0; i < slides.length; i++) {
-		slides[i].style.display = "none";
-	}
-	currentIndex=(currentIndex+slides.length+inc)%slides.length;
-	slides[currentIndex].style.display = "block";
-}
-
-setInterval(function() { nextSlide(1); }, 100); 
-
-</script>
 </html>
 <?php }
 
