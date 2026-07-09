@@ -1,5 +1,5 @@
 <?php 
-use basecamp\mooninfo;
+use basecamp\mooninfo\mooninfo;
 
 if($htm_page) { ?>
 <!DOCTYPE html>

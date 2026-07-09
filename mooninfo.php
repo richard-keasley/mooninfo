@@ -1,5 +1,5 @@
 <?php
-namespace basecamp;
+namespace basecamp\mooninfo;
 
 use \DateTime;
 
